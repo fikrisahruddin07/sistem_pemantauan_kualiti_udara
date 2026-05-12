@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemantauan Kualiti Udara (AQI)</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Mengimport Chart.js melalui CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-info">
+            <h1>Sistem Pemantauan Kualiti Udara (AQI)</h1>
+            <p>Lokasi: <strong>Kuala Lumpur</strong></p>
+        </div>
+        <div id="api-status" class="status-indicator">Menyambung...</div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Statistik Utama (Stats Cards) -->
+        <section class="stats-grid">
+            <div class="card">
+                <h3>Jumlah Sampel (24j)</h3>
+                <p id="total-samples" class="stat-value">-</p>
+            </div>
+            <div class="card">
+                <h3>Purata Indeks AQI</h3>
+                <p id="avg-aqi" class="stat-value">-</p>
+            </div>
+        </section>
+
+        <!-- Bahagian Carta (Chart Area) -->
+        <section class="chart-section">
+            <h2>Trend Kualiti Udara (24 Jam Terakhir)</h2>
+            <div class="chart-container">
+                <canvas id="aqiChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
