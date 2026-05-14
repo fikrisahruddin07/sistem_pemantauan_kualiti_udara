@@ -19,17 +19,28 @@ async function fetchAirQualityData() {
 
         const data = await response.json();
         
-        // Pemprosesan Data: Ekstrak 24 data pertama
+        //  Ekstrak 24 data pertama
         const timesRaw = data.hourly.time.slice(0, 24);
         const aqiValues = data.hourly.us_aqi.slice(0, 24);
 
-        // Format tarikh ke bentuk mesra pengguna (Contoh: 07 May)
-       const formattedLabels = timesRaw.map(timeStr => {
+        const formattedLabels = timesRaw.map(timeStr => {
     const date = new Date(timeStr);
-    // Ini akan memaparkan Jam dan Minit (cth: 14:00) diikuti tarikh
-    const masa = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-    const tarikh = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-    return `${masa}, ${tarikh}`; 
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    let tempoh = "";
+    if (hours >= 0 && hours < 12) {
+        tempoh = "pg";
+    } else if (hours >= 12 && hours < 19) {
+        tempoh = "ptg";
+    } else {
+        tempoh = "mlm";
+    }
+
+    // Tukar format 24 jam ke 12 jam (Opsional)
+    const displayHour = hours % 12 || 12; 
+
+    return `${displayHour}:${minutes} ${tempoh}`;
 });
 
         // Pengiraan Purata AQI
