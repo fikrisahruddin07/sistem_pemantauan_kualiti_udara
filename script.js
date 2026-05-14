@@ -1,5 +1,14 @@
 // URL API Open-Meteo dengan parameter yang diminta
-const API_URL = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=3.14&longitude=101.69&hourly=us_aqi";
+const API_BASE_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+const params = new URLSearchParams({
+    latitude: 3.14,
+    longitude: 101.69,
+    hourly: 'us_aqi',
+    timezone: 'Asia/Kuala_Lumpur' 
+});
+
+// Menggabungkan URL asas dengan parameter
+const API_URL = `${API_BASE_URL}?${params.toString()}`;
 
 const statusEl = document.getElementById('api-status');
 const totalSamplesEl = document.getElementById('total-samples');
