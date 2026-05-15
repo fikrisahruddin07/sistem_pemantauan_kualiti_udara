@@ -1,4 +1,4 @@
-// URL API Open-Meteo dengan parameter yang diminta
+// 1. Konfigurasi API (Mengikut format profesional image_c00d3f.png)
 const API_BASE_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 const params = new URLSearchParams({
     latitude: 3.14,
@@ -7,16 +7,16 @@ const params = new URLSearchParams({
     timezone: 'Asia/Kuala_Lumpur' 
 });
 
-// Menggabungkan URL asas dengan parameter
 const API_URL = `${API_BASE_URL}?${params.toString()}`;
 
+// 2. Rujukan Elemen UI
 const statusEl = document.getElementById('api-status');
 const totalSamplesEl = document.getElementById('total-samples');
 const avgAqiEl = document.getElementById('avg-aqi');
 
+// 3. Fungsi Utama untuk Mengambil dan Menapis Data
 async function fetchAirQualityData() {
     try {
-        // Tampilkan status memuatkan
         statusEl.innerText = "Sedang Memuatkan...";
         statusEl.style.backgroundColor = "#f39c12";
 
@@ -28,42 +28,47 @@ async function fetchAirQualityData() {
 
         const data = await response.json();
         
-        //  Ekstrak 24 data pertama
-        const timesRaw = data.hourly.time.slice(0, 24);
-        const aqiValues = data.hourly.us_aqi.slice(0, 24);
+        // GABUNG & TAPIS: Ambil 24 jam pertama, tapi buang waktu MALAM (7 mlm - 11 mlm)
+        const allData = data.hourly.time.slice(0, 24).map((t, index) => ({
+            time: t,
+            value: data.hourly.us_aqi[index]
+        }));
 
+        // Logik Penapisan: Hanya jam 0 (12 am) hingga 18 (6 pm)
+        const filteredData = allData.filter(item => {
+            const hour = new Date(item.time).getHours();
+            return hour >= 0 && hour < 19; // Membuang jam 19:00 ke atas (malam)
+        });
+
+        // Ekstrak data yang telah ditapis untuk carta
+        const timesRaw = filteredData.map(d => d.time);
+        const aqiValues = filteredData.map(d => d.value);
+
+        // Format Label: Tukar ke format 12 jam dengan penanda 'pg' atau 'ptg'
         const formattedLabels = timesRaw.map(timeStr => {
-    const date = new Date(timeStr);
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    
-    let tempoh = "";
-    if (hours >= 0 && hours < 12) {
-        tempoh = "pg";
-    } else if (hours >= 12 && hours < 19) {
-        tempoh = "ptg";
-    } else {
-        tempoh = "mlm";
-    }
+            const date = new Date(timeStr);
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            
+            // Penentuan tempoh (Malam sudah dibuang dalam filter di atas)
+            let tempoh = (hours < 12) ? "pg" : "ptg";
+            const displayHour = hours % 12 || 12; 
 
-    // Tukar format 24 jam ke 12 jam (Opsional)
-    const displayHour = hours % 12 || 12; 
+            return `${displayHour}:${minutes} ${tempoh}`;
+        });
 
-    return `${displayHour}:${minutes} ${tempoh}`;
-});
-
-        // Pengiraan Purata AQI
+        // Pengiraan Statistik Siang
         const sumAqi = aqiValues.reduce((a, b) => a + b, 0);
-        const averageAqi = (sumAqi / aqiValues.length).toFixed(1);
+        const averageAqi = aqiValues.length > 0 ? (sumAqi / aqiValues.length).toFixed(1) : 0;
 
-        // Kemaskini Antaramuka (UI)
+        // Kemaskini UI
         totalSamplesEl.innerText = aqiValues.length;
         avgAqiEl.innerText = averageAqi;
         
-        statusEl.innerText = "Data Sedia Dipaparkan";
+        statusEl.innerText = "Data Siang Berjaya Dimuatkan";
         statusEl.style.backgroundColor = "#27ae60";
 
-        // Bina Carta
+        // Paparkan Carta
         renderChart(formattedLabels, aqiValues);
 
     } catch (error) {
@@ -73,49 +78,44 @@ async function fetchAirQualityData() {
     }
 }
 
+// 4. Fungsi Render Carta (Chart.js)
 function renderChart(labels, dataValues) {
     const ctx = document.getElementById('aqiChart').getContext('2d');
     
-    new Chart(ctx, {
+    // Musnahkan carta lama jika ada (untuk elak ralat bertindih semasa refresh)
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    window.myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Nilai AQI (US AQI)',
+                label: 'Nilai AQI (Pagi & Petang)',
                 data: dataValues,
                 borderColor: '#3498db',
                 backgroundColor: 'rgba(52, 152, 219, 0.2)',
                 borderWidth: 2,
                 fill: true,
-                tension: 0.3 // Membuatkan garis lebih melengkung/smooth
+                tension: 0.3 
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // Penting untuk fungsi scroll di mobile
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Masa / Tarikh'
-                    }
+                    title: { display: true, text: 'Masa (Siang)' }
                 },
                 y: {
                     beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Nilai AQI'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
+                    title: { display: true, text: 'Nilai AQI' }
                 }
             }
         }
     });
 }
 
-// Jalankan fungsi fetch semasa halaman dimuatkan
+// 5. Jalankan Aplikasi
 fetchAirQualityData();

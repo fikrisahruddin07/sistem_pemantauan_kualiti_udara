@@ -1,4 +1,3 @@
-/* Tetapan Asas */
 * {
     margin: 0;
     padding: 0;
@@ -80,6 +79,16 @@ body {
     position: relative;
     height: 400px;
     width: 100%;
+}
+
+.chart-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Membolehkan scroll ke tepi pada mobile */
+}
+
+.chart-scroll {
+    min-width: 700px; /* Lebar minimum supaya data tidak mampat */
+    height: 400px;
 }
 
 /* Responsif */
