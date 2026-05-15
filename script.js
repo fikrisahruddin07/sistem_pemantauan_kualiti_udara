@@ -65,7 +65,7 @@ async function fetchAirQualityData() {
         totalSamplesEl.innerText = aqiValues.length;
         avgAqiEl.innerText = averageAqi;
         
-        statusEl.innerText = "Data Siang Berjaya Dimuatkan";
+        statusEl.innerText = "Data Berjaya Dimuatkan";
         statusEl.style.backgroundColor = "#27ae60";
 
         // Paparkan Carta
@@ -106,7 +106,7 @@ function renderChart(labels, dataValues) {
             maintainAspectRatio: false, // Penting untuk fungsi scroll di mobile
             scales: {
                 x: {
-                    title: { display: true, text: 'Masa (Siang)' }
+                    title: { display: true, text: 'Masa' }
                 },
                 y: {
                     beginAtZero: true,
